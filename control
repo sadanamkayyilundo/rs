@@ -1,0 +1,96 @@
+
+var GHController = angular.module('GHController', []);
+
+GHController.controller('LoginCtrl', function($scope, $rootScope, $location, $http) {
+	//fetch users.json here
+	$http.get("data/users.json").then(function(response){
+		console.log("Success  "+response);
+		$scope.users=response.data;
+	}).then(function(response){
+			if(response)
+				console.log("Error  "+response);
+	})
+
+
+    $scope.validate = function() {
+    	flag=0
+    	angular.forEach($scope.users,function(user){
+    		if(user.username==$scope.username){
+    			
+    			if(user.password==$scope.password){
+
+    				flag=1;
+    				$rootScope.user=user;
+    				$rootScope.name=user.name;
+    				$location.path("/home");
+    			}
+    	// 		else{
+    	// 			alert("Enter valid credentials");
+					// $location.path("/login");
+    	// 		}
+    			return;
+    		}
+    	});
+
+    	if(flag==0){
+    		alert("User doesnt exists or enter valid credentials");
+    		$location.path("/login");
+    	}
+	};
+
+});
+
+
+GHController.controller('BookingCtrl', function($scope, $rootScope, $location, $http) {
+    //fetch bookings.json here
+    $http.get("data/bookings.json").then(function(response){
+		console.log("Success  "+response);
+		$scope.bookings=response.data;
+	}).then(function(response){
+			if(response)
+				console.log("Error  "+response);
+	})
+    $scope.showBookings=function(){
+	//use this empty array to create the bookings list for the logged in user.
+		$rootScope.specificBooking=[];
+		
+	//Insert each entry from a loop, using push function
+		angular.forEach($scope.bookings,function(booking){
+			if(booking.name==$rootScope.user.name){
+				$rootScope.specificBooking.push(booking);
+			}
+		})
+}
+
+	$scope.book = function(){
+		fl=0;
+		//code for generating a new booking ID for a new booking
+        var bookingId=Number(Math.floor(Math.random()*10000));
+		// use constructor/prototype to initialize the new booking object property
+		//instantiate the new booking object and push it into specificBooking[]
+		var Booking=function(bookingId,name,fromDate,toDate,guests,rooms){
+			if(fromDate==undefined || toDate==undefined ||guests==undefined ||rooms==undefined){
+	   			  alert("Enter the Empty fields")	;		
+	   		}
+	   		else{
+	   			this.bookingId=bookingId;
+	   			this.name=name;
+	   			this.fromDate=fromDate;
+	   			this.toDate=toDate;
+	   			this.guests=guests;
+	   			this.rooms=rooms; 
+	   			fl=1;
+	   		}
+	   	  };
+   		book=new Booking(bookingId,$scope.name,$scope.from,$scope.to,$scope.guests,$scope.rooms);
+   		if(fl==1){
+   		$rootScope.specificBooking.push(book);
+   		alert("Booking Success! Here's the Summary: Booking Id for "+$scope.name+"'s booking is "+bookingId+" and "+$scope.rooms+" room(s) are booked between "+$scope.from+"and "+$scope.to);
+   	}
+
+
+
+
+
+	}
+});
